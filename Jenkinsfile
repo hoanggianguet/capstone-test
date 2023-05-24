@@ -8,7 +8,7 @@ pipeline {
 
 	stages {
 		
-		stage("Lint HTML files") {
+		stage("Lint HTML static files") {
 			steps {
 				sh 'echo " --- Running Tidy to Check for for Javascript Errors --- "'
 				sh 'tidy -q -e ./blue-app/*.html'
@@ -89,7 +89,7 @@ pipeline {
 						'''
 					}
 				}
-				stage("List Images after Pushing to Registry") {
+				stage("List Images after Pushing to DockerHub") {
 					steps {
 						sh 'echo " ---- Listing Dockers Images --- "'
 						sh 'docker images'
