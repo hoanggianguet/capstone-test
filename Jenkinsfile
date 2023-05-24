@@ -19,12 +19,6 @@ pipeline {
 			steps {
 				sh 'echo " --- Adding permission to execute the scripts --- "'
 				sh '''
-					chmod +x ./create_cluster.sh
-					chmod +x ./remove_cluster.sh
-					chmod +x ./create_k8s-config.sh
-					chmod +x ./switch-to-green-app.sh
-				'''
-				sh '''
 					cd ./blue-app
 					chmod +x ./build_docker.sh
 					chmod +x ./upload_docker.sh
