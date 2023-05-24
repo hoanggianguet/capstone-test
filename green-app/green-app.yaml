@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: green-app
+  labels:
+    app: green-app
+spec:
+  replicas: 2
+  selector:
+    app: green-app
+  template:
+    metadata:
+      labels:
+        app: green-app
+        version: v2.0.0
+    spec:
+      containers:
+      - name: green-app
+        image: hoanggianguet/capstone-docker-image-green
+        ports:
+        - containerPort: 80
+        env:
+        - name: VERSION
+          value: v2.0.0
