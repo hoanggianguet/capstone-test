@@ -8,16 +8,12 @@ pipeline {
 
 	stages {
 		
-		stage("Lint static files") {
-				
-				stage("Lint HTML files") {
-					steps {
-						sh 'echo " --- Running Tidy to Check for for Javascript Errors --- "'
-						sh 'tidy -q -e ./blue-app/*.html'
-						sh 'tidy -q -e ./green-app/*.html'
-					}
-				}
-			
+		stage("Lint HTML files") {
+			steps {
+				sh 'echo " --- Running Tidy to Check for for Javascript Errors --- "'
+				sh 'tidy -q -e ./blue-app/*.html'
+				sh 'tidy -q -e ./green-app/*.html'
+			}
 		}
 		stage("Adding Script Permissions") {
 			steps {
@@ -134,15 +130,15 @@ pipeline {
 				sh 'docker images'
 			}
 		}
-		// stage("Create Kubernetes Cluster in AWS EKS") {
-		// 	steps {
-		// 		withAWS(region:'us-east-1',credentials:'aws-jenkins') {
-		// 			sh 'cd ./CloudFormation'
-		// 			sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-cluster --template-file ./CloudFormation/eksctl-udacity-capstone-cluster.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
-		// 			sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-nodegroup-project --template-file ./CloudFormation/eksctl-udacity-capstone-nodegroup-project.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
-		// 		}
-		// 	}
-		// }
+		stage("Create Kubernetes Cluster in AWS EKS") {
+			steps {
+				withAWS(region:'us-east-1',credentials:'aws-jenkins') {
+					sh 'cd ./CloudFormation'
+					sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-cluster --template-file ./CloudFormation/eksctl-udacity-capstone-cluster.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
+					sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-nodegroup-project --template-file ./CloudFormation/eksctl-udacity-capstone-nodegroup-project.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
+				}
+			}
+		}
 		stage("Create Kubernetes Cluster in AWS EKS") {
 			steps {
 				withAWS(region:'us-east-1',credentials:'aws-jenkins') {
