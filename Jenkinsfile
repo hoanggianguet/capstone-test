@@ -64,14 +64,15 @@ pipeline {
 						'''
 					}
 				}
+				stage("List Images after Building") {
+					steps {
+						sh 'echo " ---- Listing Dockers Images --- "'
+						sh 'docker images'
+					}
+				}
 			}
 		}
-		stage("List Images after Building") {
-			steps {
-				sh 'echo " ---- Listing Dockers Images --- "'
-				sh 'docker images'
-			}
-		}
+		
 		stage("Push Docker Images") {
 			parallel {
 				stage("Push Blue Image") {
@@ -94,14 +95,15 @@ pipeline {
 						'''
 					}
 				}
+				stage("List Images after Pushing to Registry") {
+					steps {
+						sh 'echo " ---- Listing Dockers Images --- "'
+						sh 'docker images'
+					}
+				}
 			}
 		}
-		stage("List Images after Pushing to Registry") {
-			steps {
-				sh 'echo " ---- Listing Dockers Images --- "'
-				sh 'docker images'
-			}
-		}
+		
 		stage ("Remove Docker Images") {
 			parallel {
 				stage("Remove Blue Image") {
@@ -122,28 +124,19 @@ pipeline {
 						'''
 					}
 				}
+				stage("Confirm Docker Images are removed") {
+					steps {
+						sh 'echo " ---- Listing Dockers Images --- "'
+						sh 'docker images'
+					}
+				}
 			}
 		}
-		stage("Confirm Docker Images are removed") {
-			steps {
-				sh 'echo " ---- Listing Dockers Images --- "'
-				sh 'docker images'
-			}
-		}
-		// stage("Create Kubernetes Cluster in AWS EKS") {
-		// 	steps {
-		// 		withAWS(region:'us-east-1',credentials:'aws-jenkins') {
-		// 			sh 'cd ./CloudFormation'
-		// 			sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-cluster --template-file ./CloudFormation/eksctl-udacity-capstone-cluster.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
-		// 			sh 'aws cloudformation deploy --stack-name eksctl-udacity-capstone-nodegroup-project --template-file ./CloudFormation/eksctl-udacity-capstone-nodegroup-project.yml --capabilities CAPABILITY_NAMED_IAM --region=us-east-1'
-		// 		}
-		// 	}
-		// }
 		stage("Create Kubernetes Cluster in AWS EKS") {
 			steps {
 				withAWS(region:'us-east-1',credentials:'aws-jenkins') {
 					sh 'echo " ---- Creating Kubernetes Cluster in AWS --- "'
-					sh './create_cluster.sh'
+					sh 'eksctl create cluster --name udacity-capstone --version 1.26 --region us-east-1 --nodegroup-name project --node-type t3.micro --nodes 4 --nodes-min 2 --nodes-max 4 --managed'
 				}
 			}
 		}
@@ -151,7 +144,7 @@ pipeline {
 			steps {
 				withAWS(region:'us-east-1',credentials:'aws-jenkins') {
 					sh 'echo " ---- Updating Kubernetes Cluster Config --- "'
-					sh './create_k8s-config.sh'
+					sh 'aws eks --region us-east-1 update-kubeconfig --name udacity-capstone'
 				}
 			}
 		}
@@ -208,7 +201,7 @@ pipeline {
 			steps {
 				withAWS(region:'us-east-1',credentials:'aws-jenkins') {
 					sh 'echo " ---- Switching Application from Blue to Green --- "'
-					sh './switch-to-green-app.sh'
+					sh 'kubectl apply -f green-app/green-service.yaml'
 				}
 			}
 		}
@@ -223,25 +216,6 @@ pipeline {
 				}
 			}
 		}
-		// stage("Clean up") {
-		// 	parallel {
-		// 		stage("Cleanup Docker") {
-		// 			steps {
-		// 				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD']]) {
-		// 					sh 'echo " ---- Removing unused containers --- "'
-		// 					sh 'docker system prune -f'
-		// 				}
-		// 			}
-		// 		}
-		// 		stage("Cleanup K8S") {
-		// 			steps {
-		// 				withAWS(region:'ap-southeast-2',credentials:'aws-static') {
-		// 					sh 'echo " ---- Deleting Kubernetes Cluster --- "'
-		// 					sh './remove_cluster.sh'
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
+		
 	}
 }
